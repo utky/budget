@@ -1,0 +1,82 @@
+name:                budget
+version:             0.1.0.0
+synopsis:            Initial project template from stack
+description:         Please see README.md
+homepage:            http://github.com/githubuser/budget#readme
+license:             BSD3
+license-file:        LICENSE
+author:              Author name here
+maintainer:          example@example.com
+copyright:           2010 Author Here
+category:            Web
+build-type:          Simple
+-- extra-source-files:
+cabal-version:       >=1.10
+
+library
+  hs-source-dirs:      src
+  exposed-modules:     Budget.Core
+                       Budget.Database
+                       Budget.App
+                       Budget.API
+  other-modules:       Budget.API.Resource
+                       Budget.Core.Data
+                       Budget.Core.Store
+                       Budget.Core.Store.Internal
+                       Budget.Core.Event
+                       Budget.Database.Query
+                       Budget.Database.Schema
+                       Budget.Database.TH
+                       Budget.Database.ExpenseCategory
+                       Budget.Database.Expense
+                       Budget.Database.ExpenseTemplate
+                       Budget.Database.Geometry
+                       Budget.Database.IncomeCategory
+                       Budget.Database.Income
+                       Budget.Database.IncomeTemplate
+                       Budget.Database.Internal
+                       Budget.Database.Item
+                       Budget.Database.ItemType
+                       Budget.Database.Location
+
+  ghc-options:         -Wall
+  build-depends:       base >= 4.7 && < 5
+                     , time
+                     , text
+                     , template-haskell
+                     , mtl
+                     , free
+                     , HDBC
+                     , HDBC-sqlite3
+                     , relational-record
+                     , relational-query-HDBC 
+                     , relational-query
+                     , persistable-record
+                     , aeson
+                     , servant
+                     , servant-server
+                     , wai
+                     , warp
+  default-language:    Haskell2010
+
+executable budget
+  hs-source-dirs:      app
+  main-is:             Main.hs
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  build-depends:       base
+                     , budget
+  default-language:    Haskell2010
+
+test-suite budget-test
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+  main-is:             Spec.hs
+  build-depends:       base
+                     , budget
+                     , hspec
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  default-language:    Haskell2010
+
+source-repository head
+  type:     git
+  location: https://github.com/githubuser/budget

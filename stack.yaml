@@ -1,0 +1,32 @@
+flags: {}
+packages:
+- '.'
+extra-deps:
+- HDBC-2.4.0.1
+- HDBC-session-0.1.0.0
+- HDBC-sqlite3-2.3.3.1
+- bytestring-conversion-0.3.1
+- convertible-1.1.1.0
+- double-conversion-2.0.1.0
+- easy-file-0.2.1
+- hspec-2.2.1
+- hspec-core-2.2.1
+- hspec-discover-2.2.1
+- hspec-expectations-0.7.2
+- http-media-0.6.2
+- names-th-0.2.0.1
+- persistable-record-0.2.0.0
+- quickcheck-io-0.1.2
+- relational-query-0.7.0.1
+- relational-query-HDBC-0.4.0.0
+- relational-record-0.1.2.0
+- relational-schemas-0.1.2.1
+- servant-0.4.4.5
+- servant-server-0.4.4.5
+- sql-words-0.1.3.1
+- stringsearch-0.3.6.6
+- unix-time-0.3.6
+- wai-app-static-3.1.4
+- wai-extra-3.0.13
+- wai-logger-2.2.4.1
+resolver: ghc-7.10.2
