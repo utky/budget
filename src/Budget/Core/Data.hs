@@ -16,6 +16,16 @@ type Amount = Integer
 
 type Date = Day
 
+instance ToJSON Day where
+    toJSON d = toJSON (show d)
+    
+instance FromJSON Day where
+    parseJSON (String s)
+      = case s of
+          (y1:y2:y3:y4:'-':m1:m2:'-':d1:d1:[]) -> -- TODO: write parser
+          _                                    -> mzero
+
+
 mkDate :: Integer -> Int -> Int -> Date
 mkDate = fromGregorian
 
@@ -38,12 +48,16 @@ instance ToJSON Category
 -}
 data Item
   = Item
-  { itemName :: Text
-  , itemDate :: Date
-  , itemNote :: Text
+  { itemId   :: Integer -- ^ Identifier of item
+  , itemName :: Text -- ^ Name of item
+  , itemDate :: Date -- ^ Date of 
+  , itemNote :: Text -- ^ Note
   , itemAmount :: Amount
   , itemCategory :: Category
-  } deriving (Eq)
+  } deriving (Generic)
+
+instance Eq Item where
+  x == y = itemId x == itemId y
 
 instance Ord Item where
   a `compare` b = itemAmount a `compare` itemAmount b

@@ -27,6 +27,7 @@ library
                        Budget.Database.Query
                        Budget.Database.Schema
                        Budget.Database.TH
+                       Budget.Database.Connector
                        Budget.Database.ExpenseCategory
                        Budget.Database.Expense
                        Budget.Database.ExpenseTemplate

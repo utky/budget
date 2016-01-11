@@ -1,10 +1,10 @@
 module Budget.App (run, BudgetCommand(..)) where
 
-import           Database.HDBC (ConnWrapper(..))
 import           Database.HDBC.Sqlite3 (connectSqlite3)
 import           Servant
 import qualified Network.Wai.Handler.Warp as Warp
 import           Budget.API (api, server, createDB)
+import           Budget.Database (ConnWrapper(..), connectSqlite3)
 
 type PortNum = Int
 type DataPath = String

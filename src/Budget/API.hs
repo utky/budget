@@ -17,8 +17,8 @@ api = Proxy
 
 server :: ConnWrapper -> Server BudgetAPI
 server conn
-  =    runDB (foldFree runStore (dispatch GetIncomeCategory)) conn
-  :<|> runDB (foldFree runStore (dispatch GetExpenseCategory)) conn
+  =    runDB (runStoreM (dispatch GetIncomeCategory)) conn
+  :<|> runDB (runStoreM (dispatch GetExpenseCategory)) conn
 
 createDB :: ConnWrapper -> IO ()
 createDB conn = runDB (rawDB schema) conn

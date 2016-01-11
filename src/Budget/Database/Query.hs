@@ -11,7 +11,7 @@ import qualified Budget.Database.IncomeCategory as IncomeCategory
 import qualified Budget.Database.ExpenseCategory as ExpenseCategory
 
 import           Control.Monad.Trans
-import           Database.HDBC (IConnection, runRaw, SqlValue, withTransaction)
+import           Database.HDBC (IConnection, runRaw, SqlValue, withTransaction, getTables)
 import           Database.Relational.Query
 import           Database.Record (ToSql, FromSql)
 import           Database.HDBC.Record
@@ -54,6 +54,9 @@ selectDB q p = DB (\conn -> runQuery conn (relationalQuery q) p)
 rawDB    :: String -> DB ()
 rawDB  sql = DB (\conn -> runRaw conn sql)
 
+tableNames :: DB [String]
+tableNames = DB getTables
+
 -- | Run database middleware and gain result with side-effect.
 runDB :: ( IConnection conn , MonadIO m) => DB r -> conn -> m r
 runDB db connection = liftIO (withTransaction connection (unDB db))
@@ -66,8 +69,14 @@ runStore (Core.Update x q) = runUpdateQ x q
 runStore (Core.Remove x q) = runRemoveQ x q
 runStore (Core.Fetch q) = runFetchQ q
 
+runStoreM :: Core.StoreM a -> DB a
+runStoreM = Core.foldStoreM runStore
+
 runNewQ :: a -> Core.NewQ -> DB a
-runNewQ x _ = undefined
+runNewQ x (NewIncomeCategory cat)
+  = insertDB 
+runNewQ x (NewIncomeCategory cat)
+  = undefined
 
 runUpdateQ :: a -> Core.UpdateQ -> DB a
 runUpdateQ = undefined
@@ -75,12 +84,15 @@ runUpdateQ = undefined
 runRemoveQ :: a -> Core.RemoveQ -> DB a
 runRemoveQ = undefined
 
-
 {-| Mapping from FetchQ to Query
 -}
 runFetchQ :: Core.FetchQ a -> DB a
-runFetchQ (Core.IncomeCategories f) = fmap (f . (map from)) (selectDB IncomeCategory.incomeCategory ())
-runFetchQ (Core.ExpenseCategories f) = fmap (f . (map from)) (selectDB ExpenseCategory.expenseCategory ())
-runFetchQ (Core.ExpenseByMonth f p) = undefined
-runFetchQ (Core.IncomeByMonth f p) = undefined
+runFetchQ (Core.IncomeCategories f)
+  = fmap (f . (map from)) (selectDB IncomeCategory.incomeCategory ())
+runFetchQ (Core.ExpenseCategories f)
+  = fmap (f . (map from)) (selectDB ExpenseCategory.expenseCategory ())
+runFetchQ (Core.ExpenseByMonth f p)
+  = undefined
+runFetchQ (Core.IncomeByMonth f p)
+  = undefined
 
