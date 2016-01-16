@@ -11,30 +11,6 @@ import           Data.Text (Text)
 import           Budget.Core.Data
 import           Budget.Core.Store
 
-data NewExpenseR
-  = NewExpenseR
-  { newExpenseName :: Text
-  , newExpenseDate :: Date
-  , newExpenseNote :: Text
-  , newExpenseAmount :: Amount
-  , newExpenseCategoryId :: Integer
-  } deriving (Generic)
-
-instance FromJSON NewExpenseR
-instance ToJSON NewExpenseR
-
-data NewIncomeR
-  = NewIncomeR
-  { newIncomeName :: Text
-  , newIncomeDate :: Date
-  , newIncomeNote :: Text
-  , newIncomeAmount :: Amount
-  , newIncomeCategoryId :: Integer
-  } deriving (Generic)
-
-instance FromJSON NewIncomeR
-instance ToJSON NewIncomeR
-
 data Event m a where
   GetIncomeCategory :: Event StoreM [Category]
   GetExpenseCategory :: Event StoreM [Category]
@@ -48,10 +24,10 @@ dispatch GetIncomeCategory
   = liftS (Fetch incomeCategories)
 dispatch GetExpenseCategory
   = liftS (Fetch expenseCategories)
-dispatch (CreateExpense (NewExpenseR name date note amount catId))
-  = liftS (New () (NewExpense name date note amount catId))
-dispatch (CreateIncome (NewIncomeR name date note amount catId))
-  = liftS (New () (NewIncome name date note amount catId))
+dispatch (CreateExpense x)
+  = liftS (New () (NewExpense x))
+dispatch (CreateIncome x)
+  = liftS (New () (NewIncome x))
 dispatch (CreateExpenseCategory cat)
   = liftS (New () (NewExpenseCategory cat))
 dispatch (CreateIncomeCategory cat)

@@ -5,7 +5,7 @@ module Budget.Database.Schema where
 
 import           Budget.Database.TH (str)
 
-import           Data.Time (Day, LocalTime)
+import           Data.Time (Day, LocalTime, UTCTime)
 import           Database.HDBC (runRaw)
 import           Database.HDBC.Query.TH (defineTableFromDB)
 import           Database.HDBC.Schema.Driver (typeMap)
@@ -29,9 +29,9 @@ CREATE TABLE item (
   amount INTEGER NOT NULL,
   item_type INTEGER NOT NULL,
   date DATE NOT NULL,
-  name VARCHAR,
+  name VARCHAR NOT NULL,
   note VARCHAR,
-  crate_on DATE NOT NULL,
+  create_on TIMESTAMP NOT NULL,
   FOREIGN KEY(item_type) REFERENCES item_type(id)
 );
 
@@ -75,11 +75,15 @@ CREATE TABLE income (
 );
 
 CREATE TABLE income_template (
-  name VARCHAR NOT NULL PRIMARY KEY
+  name VARCHAR NOT NULL PRIMARY KEY,
+  category INTEGER NOT NULL,
+  FOREIGN KEY(category) REFERENCES income_category(id)
 );
 
 CREATE TABLE expense_template (
-  name VARCHAR NOT NULL PRIMARY KEY
+  name VARCHAR NOT NULL PRIMARY KEY,
+  category INTEGER NOT NULL,
+  FOREIGN KEY(category) REFERENCES expense_category(id)
 );
 
 |]
@@ -92,7 +96,7 @@ convTypes =
         , ("timestamp", [t|LocalTime|])
         , ("double", [t|Double|])
         , ("varchar", [t|String|])
-        , ("integer", [t|Integer|])
+        , ("integer", [t|Int|])
         ]
 
 defineTable' :: String -> String -> Q [Dec]

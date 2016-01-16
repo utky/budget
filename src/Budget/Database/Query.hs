@@ -9,8 +9,14 @@ import           Budget.Database.Internal (Iso(..))
 
 import qualified Budget.Database.IncomeCategory as IncomeCategory
 import qualified Budget.Database.ExpenseCategory as ExpenseCategory
+import qualified Budget.Database.Income as Income
+import qualified Budget.Database.Expense as Expense
+import qualified Budget.Database.Item as Item
 
-import           Control.Monad.Trans
+import           Data.Functor ((<$))
+import           Control.Monad.Trans (MonadIO, liftIO)
+import           Data.Time (getCurrentTime)
+import           Data.Time.LocalTime (utcToLocalTime, getCurrentTimeZone)
 import           Database.HDBC (IConnection, runRaw, SqlValue, withTransaction, getTables)
 import           Database.Relational.Query
 import           Database.Record (ToSql, FromSql)
@@ -39,6 +45,9 @@ instance MonadIO DB where
 insertDB :: (ToSql SqlValue p) => Insert p -> p -> DB Integer
 -- insertDB = InsertDB id
 insertDB i p = DB (\conn -> runInsert conn i p)
+
+insertQueryDB :: (ToSql SqlValue p) => InsertQuery p -> p -> DB Integer
+insertQueryDB i p = DB (\conn -> runInsertQuery conn i p)
 
 updateDB :: (ToSql SqlValue p) => Update p -> p -> DB Integer
 -- updateDB = UpdateDB id
@@ -73,10 +82,22 @@ runStoreM :: Core.StoreM a -> DB a
 runStoreM = Core.foldStoreM runStore
 
 runNewQ :: a -> Core.NewQ -> DB a
-runNewQ x (NewIncomeCategory cat)
-  = insertDB 
-runNewQ x (NewIncomeCategory cat)
-  = undefined
+runNewQ x (Core.NewIncomeCategory cat)
+  = x <$ insertQueryDB (IncomeCategory.insertFromCategory cat) ()
+
+runNewQ x (Core.NewExpenseCategory cat)
+  = x <$ insertQueryDB (ExpenseCategory.insertFromCategory cat) ()
+
+runNewQ x (Core.NewIncome i)
+  = x <$ do
+    itemId <- return 1
+    utcnow <- liftIO getCurrentTime
+    zone <- liftIO getCurrentTimeZone
+    let now = utcToLocalTime zone utcnow
+    insertQueryDB (Item.insertFromIncome itemId now i) ()
+    insertDB Income.insertIncome (Income.Income itemId (Core.newIncomeCategoryId i))
+
+runNewQ _ _ = undefined
 
 runUpdateQ :: a -> Core.UpdateQ -> DB a
 runUpdateQ = undefined

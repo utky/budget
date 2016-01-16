@@ -27,6 +27,10 @@ spec =
 
       it "can insert new category" $ do
         conn <- connect
-        runDB' (New (NewExpenseCategory (Category 1 "hoge"))) conn
-        (0 <= length names) `shouldBe` True
+        cats <- flip runDB' conn $
+          runStoreM $ 
+            liftS (New () (NewExpenseCategory (Category 1 "hoge")))
+            >> liftS (Fetch (ExpenseCategories id))
+
+        (categoryName $ head cats) `shouldBe` "hoge"
 

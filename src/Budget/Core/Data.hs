@@ -2,17 +2,18 @@
 module Budget.Core.Data where
 
 import           GHC.Generics
+import           Control.Monad (mzero)
 import           Data.Aeson
 import           Data.Monoid
 import           Data.Time
-import           Data.Text (Text)
+import           Data.Text (Text, unpack)
 
 -- Primitives
 -- ==================================================================
 
 {-| Amount of income or expense.
 -}
-type Amount = Integer
+type Amount = Int
 
 type Date = Day
 
@@ -21,8 +22,8 @@ instance ToJSON Day where
     
 instance FromJSON Day where
     parseJSON (String s)
-      = case s of
-          (y1:y2:y3:y4:'-':m1:m2:'-':d1:d1:[]) -> -- TODO: write parser
+      = case unpack s of
+          (y1:y2:y3:y4:'-':m1:m2:'-':d1:d2:[]) -> return $ mkDate (read (y1:y2:y3:y4:[])) (read (m1:m2:[])) (read (d1:d2:[]))
           _                                    -> mzero
 
 
@@ -31,7 +32,7 @@ mkDate = fromGregorian
 
 data Category
   = Category
-  { categoryId :: Integer
+  { categoryId :: Int
   , categoryName :: String
   } deriving (Generic)
 
@@ -44,11 +45,35 @@ instance Eq Category where
 instance FromJSON Category
 instance ToJSON Category
 
+data NewExpenseR
+  = NewExpenseR
+  { newExpenseName :: Text
+  , newExpenseDate :: Date
+  , newExpenseNote :: Text
+  , newExpenseAmount :: Amount
+  , newExpenseCategoryId :: Integer
+  } deriving (Generic)
+
+instance FromJSON NewExpenseR
+instance ToJSON NewExpenseR
+
+data NewIncomeR
+  = NewIncomeR
+  { newIncomeName :: Text
+  , newIncomeDate :: Date
+  , newIncomeNote :: Text
+  , newIncomeAmount :: Amount
+  , newIncomeCategoryId :: Int
+  } deriving (Generic)
+
+instance FromJSON NewIncomeR
+instance ToJSON NewIncomeR
+
 {-| Basic properties for representing income and expense.
 -}
 data Item
   = Item
-  { itemId   :: Integer -- ^ Identifier of item
+  { itemId   :: Int -- ^ Identifier of item
   , itemName :: Text -- ^ Name of item
   , itemDate :: Date -- ^ Date of 
   , itemNote :: Text -- ^ Note

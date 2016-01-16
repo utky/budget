@@ -36,8 +36,8 @@ foldStoreM = foldFree
 
 -- | Domain specific queries for create data.
 data NewQ 
-  = NewIncome Text Date Text Amount Integer
-  | NewExpense Text Date Text Amount Integer
+  = NewIncome NewIncomeR
+  | NewExpense NewExpenseR
   | NewIncomeCategory Category
   | NewExpenseCategory Category
 
