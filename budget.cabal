@@ -20,28 +20,32 @@ library
                        Budget.App
                        Budget.API
   other-modules:       Budget.API.Resource
+                       Budget.Core.Class
+                       Budget.Core.Class.ToAmount
                        Budget.Core.Data
+                       Budget.Core.Data.Amount
+                       Budget.Core.Data.Category
+                       Budget.Core.Data.Date
+                       Budget.Core.Data.Item
                        Budget.Core.Store
                        Budget.Core.Store.Internal
                        Budget.Core.Event
                        Budget.Database.Query
                        Budget.Database.Schema
                        Budget.Database.TH
-                       Budget.Database.ExpenseCategory
-                       Budget.Database.Expense
-                       Budget.Database.ExpenseTemplate
+                       Budget.Database.Connector
                        Budget.Database.Geometry
-                       Budget.Database.IncomeCategory
-                       Budget.Database.Income
-                       Budget.Database.IncomeTemplate
-                       Budget.Database.Internal
+                       Budget.Database.ItemCategory
+                       Budget.Database.ItemTemplate
                        Budget.Database.Item
+                       Budget.Database.Internal
                        Budget.Database.ItemType
                        Budget.Database.Location
 
   ghc-options:         -Wall
   build-depends:       base >= 4.7 && < 5
                      , time
+                     , uuid
                      , text
                      , template-haskell
                      , mtl
@@ -52,7 +56,11 @@ library
                      , relational-query-HDBC 
                      , relational-query
                      , persistable-record
+                     , pipes
+                     , vinyl
+                     , Frames
                      , aeson
+                     , attoparsec
                      , servant
                      , servant-server
                      , wai

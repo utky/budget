@@ -1,10 +1,10 @@
+{-# LANGUAGE Rank2Types #-}
 module Budget.Core.Store where
 
+import           Data.Text (Text)
 import           Control.Monad.Free
 import           Budget.Core.Data
 import           Data.Time
-
-data Key a
 
 data ByMonth = ByMonth { byYear :: Integer, byMonth :: Int }
 
@@ -31,10 +31,15 @@ type StoreM = Free Store
 liftS :: Store a -> StoreM a
 liftS = liftF
 
+foldStoreM :: (Monad m) => (forall x. Store x -> m x) -> StoreM a -> m a
+foldStoreM = foldFree
+
 -- | Domain specific queries for create data.
 data NewQ 
-  = NewIncome
-  | NewExpense
+  = NewIncome NewIncomeR
+  | NewExpense NewExpenseR
+  | NewIncomeCategory Category
+  | NewExpenseCategory Category
 
 data UpdateQ
   = UpdateIncome

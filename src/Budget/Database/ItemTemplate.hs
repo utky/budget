@@ -1,9 +1,9 @@
 {-# LANGUAGE TemplateHaskell       #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleInstances     #-}
-module Budget.Database.IncomeTemplate where
+module Budget.Database.ItemTemplate where
 
 import           Budget.Database.Schema (defineTable)
 
-$(defineTable "income_template")
+$(defineTable "item_template")
 

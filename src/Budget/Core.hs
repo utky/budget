@@ -1,5 +1,6 @@
 module Budget.Core
     ( module Budget.Core.Data
+    , module Budget.Core.Class
     , module Budget.Core.Store
     , module Budget.Core.Event
     , module Data.Time
@@ -7,6 +8,7 @@ module Budget.Core
     ) where
 
 import           Budget.Core.Data
+import           Budget.Core.Class
 import           Budget.Core.Store
 import           Budget.Core.Event
 import           Data.Aeson (encode, decode)
