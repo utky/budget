@@ -7,16 +7,15 @@ import qualified Budget.Core as Core
 import           Budget.Database.Schema (schema)
 import           Budget.Database.Internal (Iso(..))
 
-import qualified Budget.Database.IncomeCategory as IncomeCategory
-import qualified Budget.Database.ExpenseCategory as ExpenseCategory
-import qualified Budget.Database.Income as Income
-import qualified Budget.Database.Expense as Expense
+import qualified Budget.Database.ItemCategory as ItemCategory
 import qualified Budget.Database.Item as Item
 
 import           Data.Functor ((<$))
 import           Control.Monad.Trans (MonadIO, liftIO)
+import           Data.UUID (UUID, toString)
+import           Data.UUID.V4 (nextRandom)
 import           Data.Time (getCurrentTime)
-import           Data.Time.LocalTime (utcToLocalTime, getCurrentTimeZone)
+import           Data.Time.LocalTime (LocalTime, utcToLocalTime, getCurrentTimeZone)
 import           Database.HDBC (IConnection, runRaw, SqlValue, withTransaction, getTables)
 import           Database.Relational.Query
 import           Database.Record (ToSql, FromSql)
@@ -81,21 +80,31 @@ runStore (Core.Fetch q) = runFetchQ q
 runStoreM :: Core.StoreM a -> DB a
 runStoreM = Core.foldStoreM runStore
 
+currentTimestamp :: IO LocalTime
+currentTimestamp = utcToLocalTime <$> getCurrentTimeZone <*> getCurrentTime
+
+generateKeys :: IO (String, LocalTime)
+generateKeys = do
+  uuid <- fmap toString nextRandom
+  now <- currentTimestamp
+  return (uuid, now)
+
 runNewQ :: a -> Core.NewQ -> DB a
 runNewQ x (Core.NewIncomeCategory cat)
-  = x <$ insertQueryDB (IncomeCategory.insertFromCategory cat) ()
+  = x <$ insertQueryDB (ItemCategory.insertFromCategory 1 cat) ()
 
 runNewQ x (Core.NewExpenseCategory cat)
-  = x <$ insertQueryDB (ExpenseCategory.insertFromCategory cat) ()
+  = x <$ insertQueryDB (ItemCategory.insertFromCategory 2 cat) ()
 
 runNewQ x (Core.NewIncome i)
   = x <$ do
-    itemId <- return 1
-    utcnow <- liftIO getCurrentTime
-    zone <- liftIO getCurrentTimeZone
-    let now = utcToLocalTime zone utcnow
+    (itemId, now) <- liftIO generateKeys
     insertQueryDB (Item.insertFromIncome itemId now i) ()
-    insertDB Income.insertIncome (Income.Income itemId (Core.newIncomeCategoryId i))
+
+runNewQ x (Core.NewExpense i)
+  = x <$ do
+    (itemId, now) <- liftIO generateKeys
+    insertQueryDB (Item.insertFromExpense itemId now i) ()
 
 runNewQ _ _ = undefined
 
@@ -109,9 +118,9 @@ runRemoveQ = undefined
 -}
 runFetchQ :: Core.FetchQ a -> DB a
 runFetchQ (Core.IncomeCategories f)
-  = fmap (f . (map from)) (selectDB IncomeCategory.incomeCategory ())
+  = fmap (f . (map from)) (selectDB ItemCategory.incomeCategory ())
 runFetchQ (Core.ExpenseCategories f)
-  = fmap (f . (map from)) (selectDB ExpenseCategory.expenseCategory ())
+  = fmap (f . (map from)) (selectDB ItemCategory.expenseCategory ())
 runFetchQ (Core.ExpenseByMonth f p)
   = undefined
 runFetchQ (Core.IncomeByMonth f p)

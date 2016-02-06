@@ -6,3 +6,4 @@ module Budget.Database.ItemType where
 import           Budget.Database.Schema (defineTable)
 
 $(defineTable "item_type")
+
