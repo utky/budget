@@ -1,39 +1,47 @@
-flags: {}
+# For more information, see: http://docs.haskellstack.org/en/stable/yaml_configuration.html
+
+# Specifies the GHC version and set of packages available (e.g., lts-3.5, nightly-2015-09-21, ghc-7.10.2)
+resolver: lts-5.4
+
+# Local packages, usually specified by relative directory name
 packages:
 - '.'
+
+# Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
 extra-deps:
-- Frames-0.1.2.1
-- HDBC-2.4.0.1
 - HDBC-session-0.1.0.0
-- HDBC-sqlite3-2.3.3.1
-- bytestring-conversion-0.3.1
-- convertible-1.1.1.0
-- double-conversion-2.0.1.0
-- easy-file-0.2.1
-- hspec-2.2.1
-- hspec-core-2.2.1
-- hspec-discover-2.2.1
-- hspec-expectations-0.7.2
-- http-media-0.6.2
 - names-th-0.2.0.1
-- network-info-0.2.0.8
-- persistable-record-0.2.0.0
-- pipes-4.1.7
-- quickcheck-io-0.1.2
-- readable-0.3.1
-- relational-query-0.7.0.1
-- relational-query-HDBC-0.4.0.0
+- persistable-record-0.4.0.0
+- relational-query-0.8.1.0
+- relational-query-HDBC-0.6.0.0
 - relational-record-0.1.2.0
-- relational-schemas-0.1.2.1
-- servant-0.4.4.5
-- servant-server-0.4.4.5
+- relational-schemas-0.1.2.2
 - sql-words-0.1.3.1
-- stringsearch-0.3.6.6
-- unix-time-0.3.6
-- uuid-1.3.11
-- uuid-types-1.0.2
-- vinyl-0.5.1
-- wai-app-static-3.1.4
-- wai-extra-3.0.13
-- wai-logger-2.2.4.1
-resolver: ghc-7.10.2
+- text-1.2.2.0
+
+# Override default flag values for local packages and extra-deps
+flags: {}
+
+# Extra package databases containing global packages
+extra-package-dbs: []
+
+# Control whether we use the GHC we find on the path
+# system-ghc: true
+
+# Require a specific version of stack, using version ranges
+# require-stack-version: -any # Default
+# require-stack-version: >= 1.0.0
+
+# Override the architecture used by stack, especially useful on Windows
+# arch: i386
+# arch: x86_64
+
+# Extra directories used by stack for building
+# extra-include-dirs: [/path/to/dir]
+# extra-lib-dirs: [/path/to/dir]
+
+# Allow a newer minor version of GHC than the snapshot specifies
+# compiler-check: newer-minor
+nix:
+  enable: true
+  packages: [zlib, sqlite]
