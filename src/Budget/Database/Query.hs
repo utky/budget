@@ -4,12 +4,12 @@
 module Budget.Database.Query where
 
 import qualified Budget.Core as Core
+import qualified Budget.Core.Data.Expense as Expense
 import           Budget.Database.Schema (schema)
-import           Budget.Database.Internal (Iso(..))
+import           Budget.Database.Internal (From(..))
 
 import qualified Budget.Database.ItemCategory as ItemCategory
 import qualified Budget.Database.Item as Item
-
 import           Data.Functor ((<$))
 import           Control.Monad.Trans (MonadIO, liftIO)
 import           Data.UUID (UUID, toString)
@@ -22,7 +22,7 @@ import           Database.Record (ToSql, FromSql)
 import           Database.HDBC.Record
 
 
-{-| Database operation
+{-| Database operation with connection.
 -}
 newtype DB a = DB { unDB :: forall conn. (IConnection conn) => conn -> IO a }
 
@@ -77,6 +77,7 @@ runStore (Core.Update x q) = runUpdateQ x q
 runStore (Core.Remove x q) = runRemoveQ x q
 runStore (Core.Fetch q) = runFetchQ q
 
+-- | Translate StoreM to DB
 runStoreM :: Core.StoreM a -> DB a
 runStoreM = Core.foldStoreM runStore
 
@@ -114,6 +115,12 @@ runUpdateQ = undefined
 runRemoveQ :: a -> Core.RemoveQ -> DB a
 runRemoveQ = undefined
 
+monthRange :: Core.ByMonth -> (Core.Date, Core.Date)
+monthRange (Core.ByMonth y m) = 
+  let firstOfMonth = Core.mkDate y m 1
+      firstOfNextMonth = Core.nextMonth firstOfNextMonth
+  in  (firstOfMonth, firstOfNextMonth)
+
 {-| Mapping from FetchQ to Query
 -}
 runFetchQ :: Core.FetchQ a -> DB a
@@ -121,8 +128,8 @@ runFetchQ (Core.IncomeCategories f)
   = fmap (f . (map from)) (selectDB ItemCategory.incomeCategory ())
 runFetchQ (Core.ExpenseCategories f)
   = fmap (f . (map from)) (selectDB ItemCategory.expenseCategory ())
-runFetchQ (Core.ExpenseByMonth f p)
-  = undefined
-runFetchQ (Core.IncomeByMonth f p)
+runFetchQ (Core.ExpenseByMonth f range)
+  = fmap f (selectDB Item.incomeByMonth (monthRange range))
+runFetchQ (Core.IncomeByMonth f range)
   = undefined
 

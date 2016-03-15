@@ -3,6 +3,8 @@ module Budget.Core.Class.ToAmount where
 import           Data.Monoid (Sum(..))
 import           Budget.Core.Data.Amount
 import           Budget.Core.Data.Item
+import qualified Budget.Core.Data.Income as I
+import qualified Budget.Core.Data.Expense as E
 
 -- Classes
 -- ==================================================================
@@ -22,9 +24,9 @@ class ToAmount a where
 instance ToAmount Item where
   toAmount = itemAmount
 
-instance ToAmount Income where
-  toAmount = itemAmount . incomeItem
+instance ToAmount I.Income where
+  toAmount = I.amount
 
-instance ToAmount Expense where
-  toAmount = itemAmount . expenseItem
+instance ToAmount E.Expense where
+  toAmount = E.amount
 

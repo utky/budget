@@ -20,6 +20,7 @@ library
                        Budget.App
                        Budget.API
   other-modules:       Budget.API.Resource
+                       Budget.API.Data
                        Budget.Core.Class
                        Budget.Core.Class.ToAmount
                        Budget.Core.Data
@@ -27,6 +28,8 @@ library
                        Budget.Core.Data.Category
                        Budget.Core.Data.Date
                        Budget.Core.Data.Item
+                       Budget.Core.Data.Income
+                       Budget.Core.Data.Expense
                        Budget.Core.Store
                        Budget.Core.Store.Internal
                        Budget.Core.Event

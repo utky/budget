@@ -36,7 +36,7 @@ instance ToJSON NewIncomeR
 -}
 data Item
   = Item
-  { itemId   :: Int -- ^ Identifier of item
+  { itemId   :: String -- ^ Identifier of item
   , itemName :: Text -- ^ Name of item
   , itemDate :: Date -- ^ Date of 
   , itemNote :: Text -- ^ Note

@@ -6,7 +6,8 @@ import           Budget.Core
 
 testItem :: Item
 testItem = Item
-         { itemName = "foo"
+         { itemId = "hoge"
+         , itemName = "foo"
          , itemDate = mkDate 2016 1 1
          , itemAmount = 100
          , itemNote = "bar"
@@ -28,8 +29,8 @@ spec =
             amounts = [ 100, 100, 100 ]
         sumAmount (map item amounts) `shouldBe` sum amounts
 
-    describe "Income" $ do
-      it "can accumlate its amount" $ do
-        let income x = Income (testItem { itemAmount = x })
-            amounts = [ 100, 100, 100 ]
-        sumAmount (map income amounts) `shouldBe` sum amounts
+    -- describe "Income" $ do
+    --   it "can accumlate its amount" $ do
+    --     let income x = Income (testItem { itemAmount = x })
+    --         amounts = [ 100, 100, 100 ]
+    --     sumAmount (map income amounts) `shouldBe` sum amounts

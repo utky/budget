@@ -10,9 +10,11 @@ import           Budget.Database.Schema (defineTable)
 
 $(defineTable "item_category")
 
-instance Iso Category ItemCategory where
+instance To Category ItemCategory where
   to   (Category i n)     = ItemCategory i n 1
-  from (ItemCategory i n t) = Category i n
+
+instance From Category ItemCategory where
+  from (ItemCategory i n _) = Category i n
 
 queryById :: Int -> Relation () ItemCategory
 queryById itemCategoryId = relation $ do
@@ -27,10 +29,10 @@ incomeCategory :: Relation () ItemCategory
 incomeCategory = queryById 2
 
 insertFromCategory :: Int -> Category -> InsertQuery ()
-insertFromCategory itemType = insertQueryItemCategory . valueFromCategory itemType
+insertFromCategory itype = insertQueryItemCategory . valueFromCategory itype
 
 valueFromCategory :: Int -> Category -> Relation () ItemCategory
-valueFromCategory itemType cat = relation . return $
+valueFromCategory itype cat = relation . return $
   ItemCategory |$| value (categoryId cat)
                |*| value (categoryName cat)
-               |*| value itemType
+               |*| value itype

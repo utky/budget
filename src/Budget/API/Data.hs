@@ -8,6 +8,7 @@ import           Data.Attoparsec.Text
 import           GHC.Generics
 import           Data.Aeson
 import           Data.Text (Text)
+import           Servant.Common.Text (FromText(..))
 
 dateSep :: Parser Char
 dateSep = char '-'
@@ -30,9 +31,13 @@ day =
 execParse :: (MonadPlus m) => Parser a -> Text -> m a
 execParse p = either (const mzero) return . eitherResult . parse p 
 
+execParseFromText :: Parser a -> Text -> Maybe a
+execParseFromText p = either (const Nothing) Just . eitherResult . parse p 
+
 newtype Year = Year Integer deriving (Generic, Show)
 instance ToJSON Year 
 instance FromJSON Year
+instance FromText Year
 
 newtype Month = Month (Year, Int) deriving (Generic, Show)
 instance ToJSON Month where
@@ -42,9 +47,15 @@ instance FromJSON Month where
     parseJSON (String t) = execParse month t
     parseJSON _ = mzero
 
+instance FromText Month where
+    fromText = execParseFromText month
+
 newtype Day = Day (Month, Int) deriving (Generic, Show)
 instance ToJSON Day where
     toJSON (Day ((Month (y, m)), d)) = toJSON $ intercalate "-" [(show y), (show m), (show d)]
 instance FromJSON Day where
     parseJSON (String t) = execParse day t
     parseJSON _ = mzero
+
+instance FromText Day where
+    fromText = execParseFromText day
