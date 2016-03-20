@@ -13,6 +13,8 @@ import           Database.HDBC.Schema.SQLite3 (driverSQLite3)
 import           Database.HDBC.Sqlite3 (connectSqlite3)
 import           Language.Haskell.TH (Q, Dec, TypeQ)
 
+-- FIXME: income は revenue という単語でもよさそう
+
 schema :: String
 schema = [str|
 
@@ -44,7 +46,7 @@ CREATE TABLE item_type (
   name VARCHAR NOT NULL
 );
 
-INSERT INTO item_type VALUES (1, 'revenue');
+INSERT INTO item_type VALUES (1, 'income');
 INSERT INTO item_type VALUES (2, 'expense');
 
 CREATE TABLE item_category (

@@ -16,12 +16,15 @@ data Event m a where
   CreateIncomeCategory :: Category -> Event StoreM ()
   QueryIncome :: ByMonth -> Event StoreM [Income]
   QueryExpense :: ByMonth -> Event StoreM [Expense]
+  QueryIncomeTemplate :: Event StoreM [ItemTemplate]
+  QueryExpenseTemplate :: Event StoreM [ItemTemplate]
+  CreateItemTemplate :: NewItemTemplateR -> Event StoreM ()
 
 dispatch :: Event m a -> m a
 dispatch GetIncomeCategory
-  = liftS (Fetch incomeCategories)
+  = liftS (Fetch (IncomeCategories id))
 dispatch GetExpenseCategory
-  = liftS (Fetch expenseCategories)
+  = liftS (Fetch (ExpenseCategories id))
 dispatch (CreateExpense x)
   = liftS (New () (NewExpense x))
 dispatch (CreateIncome x)
@@ -30,7 +33,13 @@ dispatch (CreateExpenseCategory cat)
   = liftS (New () (NewExpenseCategory cat))
 dispatch (CreateIncomeCategory cat)
   = liftS (New () (NewIncomeCategory cat))
-dispatch (QueryIncome byMonth)
-  = liftS (Fetch (IncomeByMonth id byMonth))
-dispatch (QueryExpense byMonth)
-  = liftS (Fetch (ExpenseByMonth id byMonth))
+dispatch (QueryIncome m)
+  = liftS (Fetch (IncomeByMonth id m))
+dispatch (QueryExpense m)
+  = liftS (Fetch (ExpenseByMonth id m))
+dispatch QueryIncomeTemplate
+  = liftS (Fetch (IncomeTemplates id))
+dispatch QueryExpenseTemplate
+  = liftS (Fetch (ExpenseTemplates id))
+dispatch (CreateItemTemplate x)
+  = liftS (New () (NewItemTemplate x))

@@ -11,7 +11,7 @@ import           Budget.Core.Data.Date
 
 data Income
   = Income
-  { id       :: Int -- ^ Identifier of item
+  { id       :: String -- ^ Identifier of item
   , name     :: Text -- ^ Name of item
   , date     :: Date -- ^ Date of 
   , note     :: Text -- ^ Note

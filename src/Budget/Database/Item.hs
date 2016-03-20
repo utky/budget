@@ -3,9 +3,13 @@
 {-# LANGUAGE FlexibleInstances     #-}
 module Budget.Database.Item where
 
-import           Data.Text (unpack)
+import           Prelude hiding (id)
+import qualified Data.Maybe as MB
+import           Data.Text (unpack, pack)
 import           Data.Time (LocalTime)
 import qualified Budget.Core as Core
+import qualified Budget.Core.Data.Expense as E
+import qualified Budget.Core.Data.Income as I
 import           Database.Relational.Query
 import           Budget.Database.Internal
 import qualified Budget.Database.ItemCategory as ItemCategory
@@ -14,32 +18,52 @@ import           Budget.Database.Schema (defineTable)
 
 $(defineTable "item")
 
+type Item' = (Item, ItemCategory.ItemCategory)
+
+instance From E.Expense Item' where
+  from (i, c)
+    = E.Expense
+    { E.id = id i
+    , E.name = pack . name $ i
+    , E.date = date i
+    , E.note = pack . MB.fromMaybe "" . note $ i
+    , E.amount = amount i
+    , E.category = from c
+    }
+
+instance From I.Income Item' where
+  from (i, c)
+    = I.Income
+    { I.id = id i
+    , I.name = pack . name $ i
+    , I.date = date i
+    , I.note = pack . MB.fromMaybe "" . note $ i
+    , I.amount = amount i
+    , I.category = from c
+    }
 
 type ItemId = String
-type ItemTypeName = String
-
-nextMonth :: Int -> Int
-nextMonth m = (m + 1) `mod` 12
-
-itemByMonth :: ItemTypeName -> Relation (Core.Date, Core.Date) Item
-itemByMonth itemTypeName = relation' . placeholder $ \ph -> do
-  let fromDate = ph ! fst'
-      toDate = ph ! snd'
+-- | 
+itemByMonth
+  :: ItemType.ItemTypeName
+  -> (Core.Date, Core.Date)
+  -> Relation () Item'
+itemByMonth itemTypeName (fromDay, toDay) = relation $ do
   i <- query item
   c <- query ItemCategory.itemCategory
   t <- query ItemType.itemType
   on $ i ! itemCategory' .=. c ! ItemCategory.id'
   on $ c ! ItemCategory.itemType' .=. t ! ItemType.id'
-  wheres $ t ! ItemType.name' .=. value itemTypeName
-  wheres $ i ! date' .>=. fromDate
-  wheres $ i ! date' .<. toDate
-  return i
+  wheres $ t ! ItemType.name' .=. value (show itemTypeName)
+  wheres $ i ! date' .>=. unsafeSQLiteDayValue fromDay
+  wheres $ i ! date' .<. unsafeSQLiteDayValue toDay
+  return (i >< c)
 
-incomeByMonth :: Relation (Core.Date, Core.Date) Item
-incomeByMonth = itemByMonth "income"
+incomeByMonth :: (Core.Date, Core.Date) -> Relation () Item'
+incomeByMonth = itemByMonth ItemType.Income
 
-expenseByMonth :: Relation (Core.Date, Core.Date) Item
-expenseByMonth = itemByMonth "expense"
+expenseByMonth :: (Core.Date, Core.Date) -> Relation () Item'
+expenseByMonth = itemByMonth ItemType.Expense
 
 insertFromExpense :: ItemId -> LocalTime -> Core.NewExpenseR -> InsertQuery ()
 insertFromExpense itemId now = insertQueryItem . valueFromExpense
@@ -53,7 +77,6 @@ insertFromExpense itemId now = insertQueryItem . valueFromExpense
            |*| value (Core.newExpenseAmount i)
            |*| (value . Just . unpack) (Core.newExpenseNote i)
            |*| unsafeSQLiteTimeValue now
-
 
 insertFromIncome :: ItemId -> LocalTime -> Core.NewIncomeR -> InsertQuery ()
 insertFromIncome itemId now = insertQueryItem . valueFromIncome

@@ -4,6 +4,7 @@ module Budget.Core.Data
     , module Budget.Core.Data.Category
     , module Budget.Core.Data.Date
     , module Budget.Core.Data.Item
+    , module Budget.Core.Data.ItemTemplate
     , module Budget.Core.Data.Income
     , module Budget.Core.Data.Expense
     ) where
@@ -17,6 +18,7 @@ import           Budget.Core.Data.Amount
 import           Budget.Core.Data.Category
 import           Budget.Core.Data.Date
 import           Budget.Core.Data.Item
+import           Budget.Core.Data.ItemTemplate (ItemTemplate, NewItemTemplateR(..), newItemTemplateName, newItemTemplateCategoryId)
 import           Budget.Core.Data.Income (Income)
 import           Budget.Core.Data.Expense (Expense)
 

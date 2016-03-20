@@ -4,15 +4,13 @@
 module Budget.Database.Query where
 
 import qualified Budget.Core as Core
-import qualified Budget.Core.Data.Expense as Expense
-import           Budget.Database.Schema (schema)
 import           Budget.Database.Internal (From(..))
 
 import qualified Budget.Database.ItemCategory as ItemCategory
 import qualified Budget.Database.Item as Item
-import           Data.Functor ((<$))
+import qualified Budget.Database.ItemTemplate as ItemTemplate
 import           Control.Monad.Trans (MonadIO, liftIO)
-import           Data.UUID (UUID, toString)
+import           Data.UUID (toString)
 import           Data.UUID.V4 (nextRandom)
 import           Data.Time (getCurrentTime)
 import           Data.Time.LocalTime (LocalTime, utcToLocalTime, getCurrentTimeZone)
@@ -41,19 +39,24 @@ instance Monad DB where
 instance MonadIO DB where
   liftIO action = DB (\_ -> action)
 
+-- | Translate @relational-record@ @Insert@ DSL into DB monad
+-- Integer means count of record inserted
 insertDB :: (ToSql SqlValue p) => Insert p -> p -> DB Integer
--- insertDB = InsertDB id
 insertDB i p = DB (\conn -> runInsert conn i p)
 
+-- | Translate @relational-record@ @InsertQuery@ DSL into DB monad
+-- Integer means count of record inserted
 insertQueryDB :: (ToSql SqlValue p) => InsertQuery p -> p -> DB Integer
 insertQueryDB i p = DB (\conn -> runInsertQuery conn i p)
 
+-- | Translate @relational-record@ @Update@ DSL into DB monad
+-- Integer means count of record updated
 updateDB :: (ToSql SqlValue p) => Update p -> p -> DB Integer
--- updateDB = UpdateDB id
 updateDB u p = DB (\conn -> runUpdate conn u p)
 
+-- | Translate @relational-record@ @Delete@ DSL into DB monad
+-- Integer means count of record deleted
 deleteDB :: (ToSql SqlValue p) => Delete p -> p -> DB Integer
--- deleteDB = DeleteDB id
 deleteDB d p = DB (\conn -> runDelete conn d p)
 
 selectDB :: (ToSql SqlValue p, FromSql SqlValue a) => Relation p a -> p -> DB [a]
@@ -93,21 +96,18 @@ generateKeys = do
 runNewQ :: a -> Core.NewQ -> DB a
 runNewQ x (Core.NewIncomeCategory cat)
   = x <$ insertQueryDB (ItemCategory.insertFromCategory 1 cat) ()
-
 runNewQ x (Core.NewExpenseCategory cat)
   = x <$ insertQueryDB (ItemCategory.insertFromCategory 2 cat) ()
-
 runNewQ x (Core.NewIncome i)
   = x <$ do
     (itemId, now) <- liftIO generateKeys
     insertQueryDB (Item.insertFromIncome itemId now i) ()
-
 runNewQ x (Core.NewExpense i)
   = x <$ do
     (itemId, now) <- liftIO generateKeys
     insertQueryDB (Item.insertFromExpense itemId now i) ()
-
-runNewQ _ _ = undefined
+runNewQ x (Core.NewItemTemplate i)
+  = x <$ insertQueryDB (ItemTemplate.insert i) ()
 
 runUpdateQ :: a -> Core.UpdateQ -> DB a
 runUpdateQ = undefined
@@ -118,18 +118,27 @@ runRemoveQ = undefined
 monthRange :: Core.ByMonth -> (Core.Date, Core.Date)
 monthRange (Core.ByMonth y m) = 
   let firstOfMonth = Core.mkDate y m 1
-      firstOfNextMonth = Core.nextMonth firstOfNextMonth
+      firstOfNextMonth = Core.nextMonth firstOfMonth
   in  (firstOfMonth, firstOfNextMonth)
 
 {-| Mapping from FetchQ to Query
 -}
 runFetchQ :: Core.FetchQ a -> DB a
 runFetchQ (Core.IncomeCategories f)
-  = fmap (f . (map from)) (selectDB ItemCategory.incomeCategory ())
+  = fmap (f . (map from)) $
+    selectDB ItemCategory.incomeCategory ()
 runFetchQ (Core.ExpenseCategories f)
-  = fmap (f . (map from)) (selectDB ItemCategory.expenseCategory ())
+  = fmap (f . (map from)) $
+    selectDB ItemCategory.expenseCategory ()
 runFetchQ (Core.ExpenseByMonth f range)
-  = fmap f (selectDB Item.incomeByMonth (monthRange range))
+  = fmap (f . (map from)) $ 
+    selectDB (Item.expenseByMonth (monthRange range)) ()
 runFetchQ (Core.IncomeByMonth f range)
-  = undefined
-
+  = fmap (f . (map from)) $
+    selectDB (Item.incomeByMonth (monthRange range)) ()
+runFetchQ (Core.IncomeTemplates f)
+  = fmap (f . (map from)) $
+    selectDB (ItemTemplate.incomeTemplates) ()
+runFetchQ (Core.ExpenseTemplates f)
+  = fmap (f . (map from)) $
+    selectDB (ItemTemplate.expenseTemplates) ()

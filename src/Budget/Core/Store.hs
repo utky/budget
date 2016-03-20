@@ -1,7 +1,6 @@
 {-# LANGUAGE Rank2Types #-}
 module Budget.Core.Store where
 
-import           Data.Text (Text)
 import           Control.Monad.Free
 import           Budget.Core.Data
 import           Data.Time
@@ -34,35 +33,37 @@ liftS = liftF
 foldStoreM :: (Monad m) => (forall x. Store x -> m x) -> StoreM a -> m a
 foldStoreM = foldFree
 
--- | Domain specific queries for create data.
+-- | Domain specific queries to create data.
 data NewQ 
   = NewIncome NewIncomeR
   | NewExpense NewExpenseR
   | NewIncomeCategory Category
   | NewExpenseCategory Category
+  | NewItemTemplate NewItemTemplateR
 
+-- | Domain specific queries to update data.
 data UpdateQ
   = UpdateIncome
   | UpdateExpense
 
+-- | Domain specific queries to delete data.
 data RemoveQ
   = RemoveIncome
   | RemoveExpense
 
+-- | Domain specific queries to fetch data.
 data FetchQ a
   = IncomeCategories  ([Category] -> a)
   | ExpenseCategories ([Category] -> a)
   | IncomeByMonth     ([Income] -> a)   ByMonth
   | ExpenseByMonth    ([Expense] -> a)  ByMonth
-
-incomeCategories :: FetchQ [Category]
-incomeCategories = IncomeCategories id
-
-expenseCategories :: FetchQ [Category]
-expenseCategories = ExpenseCategories id
+  | IncomeTemplates   ([ItemTemplate] -> a)
+  | ExpenseTemplates  ([ItemTemplate] -> a)
 
 instance Functor FetchQ where
   fmap f (IncomeCategories g) = IncomeCategories (f . g)
   fmap f (ExpenseCategories g) = ExpenseCategories (f . g)
   fmap f (IncomeByMonth g month) = IncomeByMonth (f . g) month
   fmap f (ExpenseByMonth g month) = ExpenseByMonth (f . g) month
+  fmap f (IncomeTemplates g) = IncomeTemplates (f . g)
+  fmap f (ExpenseTemplates g) = ExpenseTemplates (f . g)
