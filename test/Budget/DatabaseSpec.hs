@@ -45,7 +45,25 @@ spec =
         conn <- connect
         incomes <- runDB' conn $
           runStoreM $ 
-            liftS (New () (NewIncome r))
+            liftS (New () (NewIncomeCategory (Category 1 "hoge")))
+              >> liftS (New () (NewIncome r))
               >> liftS (Fetch (IncomeByMonth id (ByMonth 2016 1)))
 
         (length incomes) `shouldBe` 1
+
+      it "can insert new expense" $ do
+        let r = NewExpenseR 
+                { newExpenseName = "name"
+                , newExpenseDate = mkDate 2016 1 1
+                , newExpenseNote = "note"
+                , newExpenseAmount = 1
+                , newExpenseCategoryId = 1
+                }
+        conn <- connect
+        expenses <- runDB' conn $
+          runStoreM $ 
+            liftS (New () (NewExpenseCategory (Category 1 "hoge")))
+              >> liftS (New () (NewExpense r))
+              >> liftS (Fetch (ExpenseByMonth id (ByMonth 2016 1)))
+
+        (length expenses) `shouldBe` 1
