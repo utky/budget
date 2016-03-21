@@ -1,0 +1,27 @@
+# Travis CI
+# http://docs.haskellstack.org/en/stable/travis_ci/
+sudo: false
+
+# Caching so the next build will be fast too.
+cache:
+  directories:
+  - $HOME/.ghc
+  - $HOME/.cabal
+  - $HOME/.stack
+
+branches:
+  only:
+    - master
+
+before_install:
+# Download and unpack the stack executable
+- mkdir -p ~/.local/bin
+- export PATH=$HOME/.local/bin:$PATH
+- travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
+
+install:
+- stack --no-terminal --install-ghc --resolver lts-5.4 test --only-dependencies
+
+script:
+- stack --no-terminal --resolver lts-5.4 --skip-ghc-check test
+
