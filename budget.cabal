@@ -1,13 +1,13 @@
 name:                budget
 version:             0.1.0.0
-synopsis:            Initial project template from stack
+synopsis:            Web API to manage accounting for my family.
 description:         Please see README.md
 homepage:            http://github.com/githubuser/budget#readme
 license:             BSD3
 license-file:        LICENSE
-author:              Author name here
-maintainer:          example@example.com
-copyright:           2010 Author Here
+author:              Yutaka Imamura
+maintainer:          ilyaletre@gmail.com
+copyright:           2015-2016 Yutaka Imamura
 category:            Web
 build-type:          Simple
 -- extra-source-files:
